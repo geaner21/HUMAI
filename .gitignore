@@ -1,0 +1,28 @@
+# ---- Python ----
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pkl
+
+# ---- Environment & Config ----
+.env
+.env.local
+*.log
+
+# ---- Data & Reports ----
+reports/
+data/*.csv
+!data/premier-league-player-23-24.csv # excepție: ținem doar datasetul principal
+
+# ---- Streamlit ----
+.streamlit/
+.cache/
+
+# ---- VSCode / IDE ----
+.vscode/
+.idea/
+
+# ---- OS Files ----
+.DS_Store
+Thumbs.db
