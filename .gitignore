@@ -28,3 +28,11 @@ data/*.csv
 # ---- OS Files ----
 .DS_Store
 Thumbs.db
+
+# ---- Virtual Environments ----
+venv/
+.envrc
+.venv/
+
+# ---- Jupyter / Notebooks ----
+*.ipynb_checkpoints/
