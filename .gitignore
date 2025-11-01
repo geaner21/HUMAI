@@ -1,3 +1,6 @@
+# Secrets / local env
+.env
+
 # ---- Python ----
 __pycache__/
 *.pyc
@@ -6,7 +9,6 @@ __pycache__/
 *.pkl
 
 # ---- Environment & Config ----
-.env
 .env.local
 *.log
 
