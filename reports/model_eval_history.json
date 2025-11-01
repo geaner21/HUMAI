@@ -1,0 +1,26 @@
+[
+  {
+    "timestamp": "2025-11-01T17:33:15.192467",
+    "model_path": "C:\\users\\caner\\HUMAI\\models\\humai_v0_9_rf.pkl",
+    "mean_R2": 0.8355571837749418,
+    "std_R2": 0.02956218609909037,
+    "mean_MSE": -2.1484848176046807,
+    "std_MSE": 0.3352755127824526,
+    "n_samples": 560,
+    "features_used": [
+      "xG",
+      "xAG",
+      "npxG",
+      "xG_per90",
+      "xAG_per90",
+      "npxG_per90",
+      "PrgP",
+      "PrgC",
+      "PrgR",
+      "Min",
+      "90s",
+      "Age",
+      "usage"
+    ]
+  }
+]
