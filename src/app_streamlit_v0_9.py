@@ -5,10 +5,12 @@ import pandas as pd
 import numpy as np
 import requests
 import streamlit as st
-from dotenv import load_dotenv
-load_dotenv()
+from dotenv import load_dotenv, find_dotenv
+load_dotenv(find_dotenv())
 
-
+print("ENV:", os.getenv("HUMAI_ENV"))
+print("API:", os.getenv("HUMAI_API_URL"))
+print("REPORTS:", os.getenv("HUMAI_REPORTS_DIR"))
 
 # ========== CONFIG FIRST LINE ==========
 st.set_page_config(page_title="HUMAI Dashboard v0.9", page_icon="🏟", layout="wide")
