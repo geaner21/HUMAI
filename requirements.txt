@@ -4,8 +4,8 @@ scikit-learn
 pandas
 numpy
 joblib
-pyhton-dotenv
+python-dotenv
 streamlit
-matplpotlib
+matplotlib
 seaborn
 requests
