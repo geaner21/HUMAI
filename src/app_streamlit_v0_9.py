@@ -168,6 +168,8 @@ tab1, tab2, tab3 = st.tabs(["📈 Overview", "🎯 Predict", "🛰️ API Analyt
 # ========== TAB 1: OVERVIEW ==========
 with tab1:
     st.header("📈 Performance Index (0-100) + Filters")
+
+
     
     df_view = df_raw.copy()
     if not df_view.empty and "Performance_Index" not in df_view.columns:
@@ -255,6 +257,19 @@ with tab2:
     if "last_pred" in st.session_state and not submitted:
         st.info(f"Last predicted: **{st.session_state['last_pred']}**")
 
+    if "last_prediction" not in st.session_state:
+        st.session_state["last_prediction"] = None
+
+    if st.button("🚀 Predict"):
+        try:
+            result = predict(payload)
+            st.session_state["last_prediction"] = result
+        except Exception as e:
+            st.error(f"Prediction failed: {e}")
+
+    if st.session_state["last_prediction"]:
+        st.success(f"Predicted Goals: **{st.session_state['last_prediction']['predicted_goals']}**")
+
     st.divider()
     st.subheader("Batch Predict (CSV)")
 
@@ -341,6 +356,13 @@ with tab3:
 
             # timestamp
             df["ts"] = pd.to_datetime(df.get("timestamp"), errors="coerce")
+
+            df["pred"] = pd.to_numeric(df.get("result.predicted_goals", np.nan), erorrs="coerce")
+            df["pred"] = df["pred"].fillna(0.0)
+            if "result.latency_ms" in df.columns:
+                df["latency_ms"] = pd.to_numeric(df["result.latency_ms"], erorrs="coerce")
+            else:
+                df["latency_ms"] = np.nan
 
             # predicted goals - trying first the plate column,
             # then extract from 'result' dict

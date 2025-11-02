@@ -175,30 +175,47 @@ def _columns_from_pipeline(m):
         return DEFAULT
 
 def _predict_dict(payload: dict) -> float:
+    """Pure function used by both /predict and /predict_batch."""
     m = get_model()
     if m is None:
         raise HTTPException(status_code=500, detail="Model not loaded.")
     
+    # normalize keys (exactly for "xAG" etc.)
     payload = _sanitize_payload(payload)
+
+    # build df from payload
     df = pd.DataFrame([payload])
 
+    # require ninety_s
     if "ninety_s" not in df.columns:
         raise HTTPException(status_code=400, detail="Missing field 'ninety_s'")
     
-    ninety_s_val = float(df.pop("ninety_s").iloc[0])
-    df["90s"] = ninety_s_val
+    # rename ninety_s => 90s
+    df["90s"] = float(df.pop("ninety_s").iloc[0])
 
     # assure that all necessary bases exist (fallback 0.0)
     for c in ["xG", "xAG", "npxG", "PrgP", "PrgC", "PrgR", "Min", "Age", "90s"]:
         if c not in df.columns:
             df[c] = 0.0
 
+    # ---- CLAMP (edge-case guardrails) ----
+    df["xG"] = df["xG"].clip(0, 60)
+    df["xAG"] = df["xAG"].clip(0, 60)
+    df["npxG"] = df["npxG"].clip(0, 60)
+    for c in ["PrgP","PrgC","PrgR"]:
+        df[c] = df[c].clip(0, 80)
+    df["Min"] = df["Min"].clip(0, 3420)
+    df["Age"] = df["Age"].clip(15, 40)
+    df["90s"] = df["90s"].clip(0.1, 38)
+
+    # engineered features
     with np.errstate(divide="ignore", invalid="ignore"):
         df["xG_per90"] = (df["xG"] / df["90s"]).replace([np.inf, -np.inf], 0).fillna(0)
         df["xAG_per90"] = (df["xAG"] / df["90s"]).replace([np.inf, -np.inf], 0).fillna(0)
         df["npxG_per90"] = (df["npxG"] / df["90s"]).replace([np.inf, -np.inf], 0).fillna(0)
         df["usage"] = (df["Min"] / (df["90s"] * 90)).replace([np.inf, -np.inf], 0).fillna(0)
 
+    # columns expected by model
     expected_cols = _columns_from_pipeline(m)
     for c in expected_cols:
         if c not in df.columns:
@@ -330,13 +347,12 @@ def predict_player(data: PlayerInput, request: Request):
         pred = _predict_dict(raw)
 
         lat_ms = round((time.perf_counter() - t0) * 1000, 1)
-        model_version = "v1.0" if os.path.basename(MODEL_CURRENT).startswith("humai_v1_0") else "v0.9"
         log_api_event(
             endpoint="/predict",
             payload=raw,
             result={
                 "predicted_goals": float(pred),
-                "model_version": "v0.9",
+                "model_version": "v1.0" if os.path.basename(MODEL_CURRENT).startswith("humai_v1_0") else "v0.9",
                 "latency_ms": float(lat_ms),
             },
             status="ok",
